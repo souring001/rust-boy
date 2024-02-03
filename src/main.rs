@@ -1,15 +1,15 @@
-use std::fmt;
+use std::{cell::RefCell, fmt, rc::Rc};
 
 #[derive(Clone)]
 struct Node<T: Clone> {
     data: T,
-    next: Option<Box<Node<T>>>,
-    prev: Option<Box<Node<T>>>,
+    next: Option<Rc<RefCell<Node<T>>>>,
+    prev: Option<Rc<RefCell<Node<T>>>>,
 }
 
 struct DoublyLinkedList<T: Clone> {
-    head: Option<Box<Node<T>>>,
-    tail: Option<Box<Node<T>>>,
+    head: Option<Rc<RefCell<Node<T>>>>,
+    tail: Option<Rc<RefCell<Node<T>>>>,
 }
 
 impl<T: Clone> DoublyLinkedList<T> {
@@ -41,14 +41,16 @@ impl<T: Clone> DoublyLinkedList<T> {
             prev: None,
         };
         if self.head.is_none() {
-            self.head = Some(Box::new(new_node.clone()));
-            self.tail = Some(Box::new(new_node));
+            let new_node = Rc::new(RefCell::new(new_node));
+            self.head = Some(new_node.clone());
+            self.tail = Some(new_node);
         } else {
             new_node.prev = self.tail.clone();
+            let new_node = Rc::new(RefCell::new(new_node));
             if let Some(tail) = &mut self.tail {
-                tail.next = Some(Box::new(new_node.clone()));
+                tail.borrow_mut().next = Some(new_node.clone());
             }
-            self.tail = Some(Box::new(new_node));
+            self.tail = Some(new_node);
         }
     }
 
@@ -65,16 +67,31 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut current = self.head.clone();
-        write!(f, "(");
+        write!(f, "head: (")?;
         while let Some(node) = current {
-            let n = node;
+            let n = node.borrow();
             write!(f, "{}", n.data)?;
+            // write!(f, " @{:p}", &n.data)?;
             current = n.next.clone();
             if current.is_some() {
                 write!(f, "<--->")?;
             }
         }
-        write!(f, ")");
+        write!(f, ") ")?;
+
+        let mut current = self.tail.clone();
+        write!(f, "tail: (")?;
+        while let Some(node) = current {
+            let n = node.borrow();
+            write!(f, "{}", n.data)?;
+            // write!(f, " @{:p}", &n.data)?;
+            current = n.prev.clone();
+            if current.is_some() {
+                write!(f, "<--->")?;
+            }
+        }
+        write!(f, ")")?;
+
         Ok(())
     }
 }
