@@ -1,0 +1,36 @@
+Node:
+  init:
+    self.data = data
+    self.next = None
+    self.prev = None
+
+DoublyLinkedList:
+  init:
+    self.head = None
+    self.tail = None
+  
+  pop_back:
+    self.tail 
+
+  pop_front:
+    self.head 
+
+  push_back:
+    new_node = Node()
+    if self.is_empty():
+      self.head = new_node
+      self.tail = new_node
+    else:
+      new_node.prev = self.tail
+      self.tail.next = new_node
+      self.tail = new_node
+
+   push_front:
+    new_node = Node()
+    if self.is_empty():
+      self.head = new_node
+      self.tail = new_node
+    else:
+      new_node.next = self.head
+      self.head.prev = new_node
+      self.head = new_node
