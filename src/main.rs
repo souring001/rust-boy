@@ -57,7 +57,23 @@ impl<T: Clone> DoublyLinkedList<T> {
     /// Adds an element first in the list.
     /// This operation should compute in O(1) time.
     fn push_front(&mut self, elt: T) {
-        unimplemented!()
+        let mut new_node = Node {
+            data: elt,
+            next: None,
+            prev: None,
+        };
+        if self.head.is_none() {
+            let new_node = Rc::new(RefCell::new(new_node));
+            self.head = Some(new_node.clone());
+            self.tail = Some(new_node);
+        } else {
+            new_node.next = self.head.clone();
+            let new_node = Rc::new(RefCell::new(new_node));
+            if let Some(head) = &mut self.head {
+                head.borrow_mut().prev = Some(new_node.clone());
+            }
+            self.head = Some(new_node);
+        }
     }
 }
 
