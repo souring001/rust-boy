@@ -35,13 +35,21 @@ impl<T: Clone> DoublyLinkedList<T> {
     /// Appends an element to the back of a list.
     /// This operation should compute in O(1) time.
     fn push_back(&mut self, elt: T) {
-        let new_node = Node {
+        let mut new_node = Node {
             data: elt,
             next: None,
             prev: None,
         };
-        self.head = Some(Box::new(new_node.clone()));
-        self.tail = Some(Box::new(new_node));
+        if self.head.is_none() {
+            self.head = Some(Box::new(new_node.clone()));
+            self.tail = Some(Box::new(new_node));
+        } else {
+            new_node.prev = self.tail.clone();
+            if let Some(tail) = &mut self.tail {
+                tail.next = Some(Box::new(new_node.clone()));
+            }
+            self.tail = Some(Box::new(new_node));
+        }
     }
 
     /// Adds an element first in the list.
